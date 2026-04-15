@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import JobCard from "@/components/job-card";
 
 const locations: string[] = [
   "Delhi",
@@ -62,9 +63,39 @@ const JobsPage = () => {
       setLoading(false);
     }
   }
-  useEffect(() => {
-    fetchJobs();
-  }, [title, location]);
+ useEffect(() => {
+  let isMounted = true;
+
+  async function fetchJobsSafe() {
+    setLoading(true);
+    try {
+      const { data } = await axios.get(
+        `${job_service}/api/job/all?title=${title}&location=${location}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (isMounted) {
+        setJobs(data);
+      }
+    } catch (error) {
+      // handle error
+    } finally {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }
+  }
+
+  fetchJobsSafe();
+
+  return () => {
+    isMounted = false;  
+  };
+}, [title, location]);
   const clickEvent = () => {
     ref.current?.click();
   };
@@ -136,8 +167,11 @@ const JobsPage = () => {
           <>
             {jobs && jobs.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {jobs.map((job) => (
+                {/* {jobs.map((job) => (
                   <div key={job.job_id}>{job.title}</div>
+                ))} */}
+                {jobs.map((job) => (
+                  <JobCard key={job.job_id} job={job} />
                 ))}
               </div>
             ) : (
@@ -173,7 +207,13 @@ const JobsPage = () => {
                 Search by job title
               </Label>
 
-              <Input id="title" type="text" placeholder="Enter company name" />
+              <Input
+                id="title"
+                type="text"
+                placeholder="Enter job title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label

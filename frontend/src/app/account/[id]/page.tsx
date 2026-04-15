@@ -33,8 +33,35 @@ const UserAccount = () => {
     }
   }
   useEffect(() => {
-    fetchUser();
-  }, [id]);
+  let isMounted = true;
+
+  const fetchUser = async () => {
+    const token = Cookies.get("token");
+    if (!token) return;
+
+    try {
+      const { data } = await axios.get("/api/user/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (isMounted) setUser(data);
+    } catch (error) {
+      console.log("User fetch failed");
+
+      if (isMounted) {
+        setUser(null); // silent logout
+      }
+    }
+  };
+
+  fetchUser();
+
+  return () => {
+    isMounted = false;
+  };
+}, []);
   if(loading)return <Loading/>
   return   <>
       {user && (
