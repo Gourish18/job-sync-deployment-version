@@ -73,50 +73,30 @@ Mastery', 'DevOps & Cloud').",
       model: "gemini-2.5-flash",
       contents: prompt,
     });
+
     let jsonResponse;
 
-try {
-  const rawText = response?.candidates?.[0]?.content?.parts?.[0]?.text
-    ?.replace(/```json/g, "")
-    .replace(/```/g, "")
-    .trim();
-
-  if (!rawText) {
-    throw new Error("No response from AI");
-  }
-
-  jsonResponse = JSON.parse(rawText);
-} catch (error) {
-  console.log("RAW AI RESPONSE:", response);
-  
-  return res.status(500).json({
-    message: "Failed to parse AI response",
-  });
-}
-
-    // let jsonResponse;
-
-  //   try {
-  //     const rawText = response?.candidates?.[0]?.content?.parts?.[0]?.text
-  //       ?.replace(/```json/g, "")
-  //       .replace(/```/g, "")
-  //       .trim();
-  //     if (!rawText) {
-  //       throw new Error("No response from AI");
-  //     }
-  //     jsonResponse = JSON.parse(rawText);
-  //   } catch (error) {
-  //     return res.status(500).json({
-  //       message: "Failed to parse AI response as JSON",
-  //       error: (error as Error).message,
-  //       rawResponse: response?.text,
-  //     });
-  //   }
-  //   res.json(jsonResponse);
-  // } catch (error: any) {
-  //   res.status(500).json({
-  //     message: error.message,
-  //   });
+    try {
+      const rawText = response?.candidates?.[0]?.content?.parts?.[0]?.text
+        ?.replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+      if (!rawText) {
+        throw new Error("No response from AI");
+      }
+      jsonResponse = JSON.parse(rawText);
+    } catch (error) {
+      return res.status(500).json({
+        message: "Failed to parse AI response as JSON",
+        error: (error as Error).message,
+        rawResponse: response?.text,
+      });
+    }
+    res.json(jsonResponse);
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
+    });
   }
 });
 
