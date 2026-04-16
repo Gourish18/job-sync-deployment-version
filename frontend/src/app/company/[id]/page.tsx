@@ -34,27 +34,48 @@ const CompanyPage = () => {
   const [openings, setopenings] = useState("");
 
   // 🔥 FETCH COMPANY
-  async function fetchCompany() {
-    try {
-      setLoading(true);
+async function fetchCompany() {
+  try {
+    setLoading(true);
 
-      const { data } = await axios.get(
-        `${job_service}/api/job/company/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setCompany(data);
-    } catch (error) {
-      toast.error("Failed to load company");
-    } finally {
+    if (!token) {
+      toast.error("User not logged in");
       setLoading(false);
+      return;
     }
-  }
 
+    console.log("Calling API:", `${job_service}/api/job/company/${id}`);
+
+    const { data } = await axios.get(
+      `${job_service}/api/job/company/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        timeout: 10000, // 🔥 prevents infinite loading
+      }
+    );
+
+    console.log("API response:", data);
+
+    setCompany(data);
+
+  } catch (error: any) {
+    console.log("FETCH ERROR:", error);
+
+    if (axios.isAxiosError(error)) {
+      console.log("STATUS:", error.response?.status);
+      console.log("DATA:", error.response?.data);
+
+      toast.error(error.response?.data?.message || "Failed to load company");
+    } else {
+      toast.error("Something went wrong");
+    }
+
+  } finally {
+    setLoading(false); // 🔥 MUST ALWAYS RUN
+  }
+}
   // 🔥 ADD JOB
   const addJobHandler = async () => {
     // ✅ validation
