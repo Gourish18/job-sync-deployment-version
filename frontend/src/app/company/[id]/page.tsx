@@ -153,7 +153,13 @@ async function fetchCompany() {
     }
   }, [id, token]);
 
-  if (loading) return <Loading />;
+ if (loading) {
+  return (
+    <div className="flex justify-center items-center h-screen">
+      <Loading />
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen p-6">
