@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { useCallback } from "react";
 // export const utils_service="http://localhost:5001";
 // export const auth_service="http://localhost:5000";
 // export const user_service="http://localhost:5002";
@@ -21,7 +22,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [btnLoading, setBtnLoading] = useState(false);
   const token=Cookies.get("token");
-  async function fetchUser() {
+const fetchUser = useCallback(async () => {
   try {
     const { data } = await axios.get(`${user_service}/api/user/me`, {
       headers: {
@@ -32,12 +33,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setUser(data);
     setIsAuth(true);
   } catch (error) {
-    console.log(error);
     setIsAuth(false);
   } finally {
     setLoading(false);
   }
-}
+}, [token]);
 async function updateProfilePic(formData: FormData) {
   setLoading(true);
   try {
@@ -212,7 +212,7 @@ async function logoutUser() {
 }
 const [applications, setApplications] = useState<Application[] >([]);
 
-async function fetchApplications() {
+const fetchApplications = useCallback(async () => {
   try {
     const { data } = await axios.get(
       `${user_service}/api/user/application/all`,
@@ -224,20 +224,21 @@ async function fetchApplications() {
     );
 
     setApplications(data);
-  } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Something went wrong");
-      } else {
-        toast.error("Something went wrong");
-      }
-    }
-}
-useEffect(() => {
+  } catch (error) {
+    console.log(error);
+  }
+}, [token]);
 
+useEffect(() => {
+  if (token) {
     fetchUser();
     fetchApplications();
-  
-})
+  } else {
+    setLoading(false);
+  }
+}, [token, fetchUser, fetchApplications]);
+
+
   return (
     <AppContext.Provider
       value={{
