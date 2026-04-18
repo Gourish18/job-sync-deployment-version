@@ -30,7 +30,9 @@
 //   console.log(`📧 Email sent to ${to}`);
 // };
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
+dotenv.config();
 export const sendEmail = async ({ to, subject, html }: any) => {
 
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
