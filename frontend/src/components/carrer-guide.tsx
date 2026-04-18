@@ -47,32 +47,83 @@ const CarrerGuide = () => {
       addSkill();
     }
   };
-
   const getCareerGuidance = async () => {
-    if (skills.length === 0) {
-      alert("Please add at least one skill");
-      return;
-    }
+  if (skills.length === 0) {
+    alert("Please add at least one skill");
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const { data } = await axios.post(`${utils_service}/api/utils/career`, {
+  try {
+    const { data } = await axios.post(
+      `${utils_service}/api/utils/career`,
+      {
         skills: skills,
-      });
+      }
+    );
 
-      setResponse(data);
-      alert("Career guidance generated");
-    } catch (error: unknown) {
-      alert(
-        error instanceof Error
-          ? error.message
-          : "An error occurred while generating career guidance",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    // ✅ defensive fallback so bad AI response doesn't crash UI
+    setResponse({
+      summary: data?.summary || "No summary available",
+
+      jobOptions: Array.isArray(data?.jobOptions)
+        ? data.jobOptions
+        : [],
+
+      skillsToLearn: Array.isArray(data?.skillsToLearn)
+        ? data.skillsToLearn
+        : [],
+
+      learningApproach: {
+        title:
+          data?.learningApproach?.title ||
+          "Learning Approach",
+
+        points: Array.isArray(data?.learningApproach?.points)
+          ? data.learningApproach.points
+          : [],
+      },
+    });
+
+    alert("Career guidance generated");
+
+  } catch (error: unknown) {
+    alert(
+      error instanceof Error
+        ? error.message
+        : "An error occurred while generating career guidance"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // const getCareerGuidance = async () => {
+  //   if (skills.length === 0) {
+  //     alert("Please add at least one skill");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+
+  //   try {
+  //     const { data } = await axios.post(`${utils_service}/api/utils/career`, {
+  //       skills: skills,
+  //     });
+
+  //     setResponse(data);
+  //     alert("Career guidance generated");
+  //   } catch (error: unknown) {
+  //     alert(
+  //       error instanceof Error
+  //         ? error.message
+  //         : "An error occurred while generating career guidance",
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const resetDialog = () => {
     setSkills([]);
     setCurrentSkill("");

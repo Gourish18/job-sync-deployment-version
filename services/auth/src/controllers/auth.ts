@@ -136,7 +136,12 @@ export const forgotPassword = TryCatch(async (req, res, next) => {
   };
 
   // ✅ EMAIL SENT HERE
+  try {
   await sendEmail(message);
+} catch (err: any) {
+  console.error("EMAIL ERROR:", err);
+  throw new ErrorHandler(500, err.message || "Email sending failed");
+}
 
   res.json({
     message:
