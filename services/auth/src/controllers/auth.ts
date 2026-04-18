@@ -93,6 +93,7 @@ export const loginUser = TryCatch(async (req, res, next) => {
     token,
   });
 });
+
 export const forgotPassword = TryCatch(async (req, res, next) => {
   const { email } = req.body;
 
